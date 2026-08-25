@@ -34,7 +34,6 @@ pandas
 scipy
 scikit-learn
 tabulate
-openpyxl
 
 ---
 
