@@ -60,8 +60,8 @@ Future updates may include improvements, recalibration, and extended functionali
 ## Citation
 If you use this tool, please cite the associated publication and archived version:
 
-> Rockey A., Hurlebaus S., *Constrained Ordinal Learning for ISO~9223 Atmospheric Corrosivity Assessment of Steel Infrastructure*, Journal Name, Year.  
-> DOI: xxx  
+> Rockey A., Hurlebaus S., *Constrained Ordinal Learning for Atmospheric Corrosivity Classification of Steel Using ISO 9223*, npj Materials Degradation, 2026.  
+> DOI: xxxxxx
 
 Zenodo Archive:
 > DOI: 10.5281/zenodo.xxxxxxx
