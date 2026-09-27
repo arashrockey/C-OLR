@@ -1,7 +1,7 @@
 """
 Atmospheric Corrosion Modeling using Constrained Ordinal Logistic Regression (C-OLR)
 
-This script implements the C-OLR model used to classify atmospheric
+This python script implements the C-OLR model used to classify atmospheric
 corrosivity into ordered ISO 9223 categories (C2-C5) from environmental
 exposure variables.
 
@@ -27,34 +27,43 @@ from sklearn.metrics import accuracy_score, cohen_kappa_score, balanced_accuracy
 
 
 # Data path and combination of C1/C2 and C5/CX categories.
-path = "C:/Users/.../datasets.xlsx"
+path = "C:/Users/datasets.xlsx"
 
 data1 = pd.read_excel(path, sheet_name="training_dataset")
 data2 = pd.read_excel(path, sheet_name="testing_dataset") 
 
 category_map = {
-    "C1": "C2",
-    "C2": "C2",
-    "C3": "C3",
-    "C4": "C4",
-    "C5": "C5",
-    "CX": "C5"
-}
+                "C1": "C2",
+                "C2": "C2",
+                "C3": "C3",
+                "C4": "C4",
+                "C5": "C5",
+                "CX": "C5"
+               }
 
 data1["CAT"] = data1["CAT"].astype(str).str.strip().replace(category_map)
 data2["CAT"] = data2["CAT"].astype(str).str.strip().replace(category_map)
 
 
 '''
-Scale environmental variables using ranges calculated from the
-training dataset. The same training ranges are applied to the
-independent testing dataset.
+Scale environmental variables using predefined ranges.
+The same predefined ranges are applied to the training and
+external testing datasets.
+
+The predefined ranges were selected to cover the expected environmental
+conditions and, where applicable, the ranges specified by ISO 9223:
+Temperature: -20 to 60 deg C
+TOW: 0 to 8760 h/year
+Cl: 0 to 1500 mg/m^2/day
+SO2: 0 to 200 mg/m^2/day
+WL: 0 to 700 micrometers/year
 '''
 
-scale_cols = ['Temperature','Cl','SO2','WL']
+scale_cols = ['Temperature','TOW','Cl','SO2','WL']
 
-min_1 = data1[scale_cols].min().values
-max_1 = data1[scale_cols].max().values
+min_1 = [-20,    0.,  0.,    0.,    0.  ]
+max_1 = [60,  8760,  1500,   200,  700  ]
+
 
 def minmax(df, columns, min_arr, max_arr, eps=1e-6):
     scaled = df.copy()
@@ -69,9 +78,6 @@ def minmax(df, columns, min_arr, max_arr, eps=1e-6):
 data1 = minmax(data1, scale_cols, min_1, max_1)
 data2 = minmax(data2, scale_cols, min_1, max_1)
 
-# Convert TOW from hours/year to a fraction of a year.
-data1["TOW"] = data1["TOW"] / (24 * 365)
-data2["TOW"] = data2["TOW"] / (24 * 365)
 
 columns = ['Temperature', 'TOW', 'Cl', 'SO2']
 atmosphere_train = data1['Atmosphere'].values.astype(int)
@@ -98,7 +104,7 @@ n_thresholds = len(grade_order) - 1
 
 # Initialize environmental weights, atmospheric effects, and latent thresholds.
 init_beta = np.ones(n_features) * 0.1
-init_alpha = np.array([0.1, 0.2, 0.3, 0.4])
+init_alpha = np.array([0.0, 0.1, 0.2, 0.3])
 init_theta = np.array([5.0, 10.0, 15.0])
 
 init = np.concatenate([init_alpha, init_beta, init_theta])
@@ -151,7 +157,13 @@ def nll(params, lam=1e-5):
     return -ll + penalty
 
 
-
+'''
+Bounds for Constrained OLR:
+Atmospheric effects (alpha) are ordinal constrained and 
+environmental coefficients (beta) take positive values.
+Latent thresholds (theta) are not individually bounded; their ordering
+is imposed separately through order_constraint().        
+'''
 
 
 bounds = ([(0, None)] * n_atmosphere
@@ -164,7 +176,7 @@ def order_constraint(params):
 
     alpha = params[:n_atmosphere]
 
-    theta = params[4 + n_features:]
+    theta = params[n_atmosphere + n_features:]
 
     return np.array([
         alpha[1] - alpha[0],
@@ -174,7 +186,10 @@ def order_constraint(params):
         theta[2] - theta[1]
     ])
 
-cons = [{'type': 'ineq','fun': order_constraint}]
+cons = [
+    {'type': 'ineq', 'fun': order_constraint},
+    {'type': 'eq', 'fun': lambda params: params[0]}
+]
 
 res = minimize( nll, init, bounds=bounds, constraints=cons, method='SLSQP', options={'ftol': 1e-12,'maxiter': 1000,'disp': False} )
 
@@ -187,7 +202,7 @@ print("\nOptimization message:", res.message)
 
 
 
-# Rsults
+# Results
 # --------------------------------------------------------------
 print("\n*** C-OLR Fitted Model Parameters ***")
 alpha = params_opt[:n_atmosphere]
@@ -207,11 +222,11 @@ for i, value in enumerate(alpha, start=1):
 
 print("\nC-OLR environmental weights (\u03B2):")
 for column, value in zip(columns, weights):
-    print(f"\u03B2_{column} = {value:.1f}")
+    print(f"\u03B2_{column} = {value:.2f}")
 
 print("\nLearned latent thresholds (\u03B8):")
 for i, value in enumerate(theta, start=1):
-    print(f"\u03B8{i} = {value:.1f}")
+    print(f"\u03B8{i} = {value:.2f}")
 
 
 def score_to_letter(score):
