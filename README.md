@@ -7,7 +7,7 @@ Python implementation of a Constrained Ordinal Logistic Regression (C-OLR) frame
 ## Abstract
 This repository contains the custom Python implementation of the Constrained Ordinal Logistic Regression (C-OLR) framework developed for the classification of atmospheric corrosivity based on environmental exposure parameters.
 
-The framework uses ordinal logistic regression with non-negative constraints on the regression coefficients to preserve physically meaningful relationships between environmental exposure conditions and corrosion severity. The repository provides the model implementation, datasets used for model development and independent evaluation, and supporting information required to reproduce the analyses reported in the associated publication (DOI: xxx).
+The framework uses ordinal logistic regression with non-negative constraints on the regression coefficients to preserve physically meaningful relationships between environmental exposure conditions and corrosion severity. The repository provides the model implementation, datasets used for model development and independent evaluation, and supporting information required to reproduce the analyses reported in the associated study.
 
 ---
 
@@ -60,7 +60,7 @@ Future updates may include improvements, recalibration, and extended functionali
 ## Citation
 If you use this tool, please cite the associated publication and archived version:
 
-> Rockey A., Hurlebaus S., *Constrained Ordinal Learning for Atmospheric Corrosivity Classification of Steel Using ISO 9223*, npj Materials Degradation, 2026.  
+> Rockey A., Hurlebaus S., *Constrained Ordinal Learning for Atmospheric Corrosivity Classification of Steel Using ISO 9223*, npj Materials Degradation, (Under Review, 2026). 
 > DOI: xxxxxx
 
 Zenodo Archive:
