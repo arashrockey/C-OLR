@@ -66,7 +66,7 @@ If you use this tool, please cite the associated paper and archived version:
 
 Zenodo Archive:
 
-> DOI: 10.5281/zenodo.xxxxxxx
+> DOI: 10.5281/zenodo.23052416 
 
 ---
 
